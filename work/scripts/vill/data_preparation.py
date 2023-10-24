@@ -8,8 +8,8 @@
 """
 
 
-import os
-os.chdir('/Users/vill/Major2023/SoftwareEngineering/work')
+from common import cwd_work
+cwd_work()
 import numpy as np
 import pandas as pd
 
