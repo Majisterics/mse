@@ -67,4 +67,10 @@ logging.info(f"\nready_to_build:\t{dfProcessed[dfProcessed['status'] == 'ready_t
 logging.info(f"\nfor_sale:\t{dfProcessed[dfProcessed['status'] == 'for_sale']['status'].count() / dfProcessed['status'].count() * 100:.1f}%\n")
 logging.info(f"\nsecond_sale:\t{dfProcessed[dfProcessed['status'] == 'second_sale']['status'].count() / dfProcessed['status'].count() * 100:.1f}%\n")
 
+# converting different distance measures (acres, square feet) to square meters
+# approximation of acre to square meters
+dfProcessed["acre_lot"] = dfProcessed["acre_lot"].apply(lambda x: x * 4046.85642)
+# approximation of square feet to square meters
+dfProcessed["house_size"] = dfProcessed["house_size"].apply(lambda x: x / 3.281**2)
+
 dfProcessed.to_csv(pData.joinpath("processed-realtor-data").with_suffix(".csv"), index=False)
