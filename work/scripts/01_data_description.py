@@ -38,6 +38,7 @@ dfStats = pd.concat([dfDescribe, dfIQR])
 
 logging.info(f"Results\n{dfStats}\n")
 
+# removing NaN values to measure corellation
 C_P = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns) 
 P_P = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
 C_S = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
