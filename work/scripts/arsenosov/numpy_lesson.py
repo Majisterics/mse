@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 
 
-path: str = str(Path.home().joinpath("Major2023/SoftwareEngineering/work"))
+path: str = str(Path.home().joinpath("mse/work"))
 os.chdir(path)
 
 x = np.arange(16)
