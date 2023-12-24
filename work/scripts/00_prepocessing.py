@@ -74,6 +74,7 @@ dfProcessed["acre_lot"] = dfProcessed["acre_lot"].apply(lambda x: x * 4046.85642
 dfProcessed["house_size"] = dfProcessed["house_size"].apply(lambda x: x / 3.281**2)
 
 # drop prev_sold_date as unused in work and drop all NaN's
+# dfProcessed = dfProcessed.drop(columns=["prev_sold_date"])
 dfProcessed = dfProcessed.drop(columns=["prev_sold_date"]).dropna()
 
 dfProcessed.to_csv(pData.joinpath("processed-realtor-data").with_suffix(".csv"), index=False)
