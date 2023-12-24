@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+from pandas.api.types import CategoricalDtype
 
 
 pWork: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
@@ -48,4 +49,15 @@ ax.get_figure().clear()
 # 5. Гистограмма для bath
 ax = dfData["bath"].plot.hist()
 ax.get_figure().savefig(pImages.joinpath("bath_hist").with_suffix(".png"))
+ax.get_figure().clear()
+
+# 6. Гистограмма для status
+status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], ordered=True)
+dfData["status"] = dfData["status"].astype(status_cat_type)
+# print(dfData.dtypes)
+# dfData["status_codes"] = dfData["status"].cat.codes
+
+dfStatus = pd.DataFrame({"status": ["for_sale", "second_sale"], "values": [len(dfData[dfData["status"] == "for_sale"]), len(dfData[dfData["status"] == "second_sale"])]})
+ax = dfStatus.plot.bar(x="status", rot=0)
+ax.get_figure().savefig(pImages.joinpath("status_bar").with_suffix(".png"))
 ax.get_figure().clear()

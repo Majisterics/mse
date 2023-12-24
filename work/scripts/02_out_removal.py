@@ -22,12 +22,6 @@ IQR: pd.Series = dfDataFloat.quantile(q=0.75) - dfDataFloat.quantile(q=0.25)
 dfIQR = pd.DataFrame([IQR], index=['IQR'])
 dfStats = pd.concat([dfDescribe, dfIQR])
 
-# irq = dfIQR['price']
-# wisker_u = (dfStats.loc['50%', 'price'] + 1.5*irq).values[0]
-# wisker_l = (dfStats.loc['50%', 'price'] - 1.5*irq).values[0]
-# out = (dfData['price'] > wisker_u) | (dfData['price'] <= wisker_l)
-# dfData = dfData[~out]
-
 irq_acre_lot = dfIQR['acre_lot']
 wisker_u_acre_lot = (dfStats.loc['50%', 'acre_lot'] + 1.5*irq_acre_lot).values[0]
 wisker_l_acre_lot = (dfStats.loc['50%', 'acre_lot'] - 1.5*irq_acre_lot).values[0]
