@@ -54,14 +54,14 @@ mq = pd.DataFrame([], columns=['adjR^2', 'AIC']) # Данные о качест�
 # Формируем целевую переменную
 Y = CA_train['price']
 # Формируем фиктивные (dummy) переменные для всех качественных переменных
-DUM = pd.get_dummies(CA_train[['status']])
+DUM = pd.get_dummies(CA_train[['bed', 'bath', 'status']])
 # Выбираем переменные для уровней, которые войдут в модель
 # Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
 # переменную отсчитывается от него
-# DUM = DUM[['music_есть', 'signal_есть']]
+DUM = DUM[['status_for_sale', 'status_second_sale']]
 # Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
 # Добавляем слева фиктивные переменные
-X = pd.concat([DUM, CA_train[['bed', 'bath', 'acre_lot', 'house_size']]], axis=1)
+X = pd.concat([DUM, CA_train[['acre_lot', 'house_size']]], axis=1)
 # Добавляем переменную равную единице для учета константы
 X = sm.add_constant(X)
 X = X.astype({'const':'uint8'}) # Сокращаем место для хранения константы
@@ -70,7 +70,7 @@ linreg00 = sm.OLS(Y,X)
 # Оцениваем модель
 fitmod00 = linreg00.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/CARS_STAT.txt', 'a') as fln:
+with open('./output/realtor_stat.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod00.summary(), file=fln)
@@ -83,7 +83,7 @@ vif["vars"] = X_q.columns
 vif["VIF"] = [variance_inflation_factor(X_q.values, i) 
               for i in range(X_q.shape[1])]
 # Сохраняем полученные результаты
-with pd.ExcelWriter('./output/CARS_STAT.xlsx', engine="openpyxl", 
+with pd.ExcelWriter('./output/realtor_stat.xlsx', engine="openpyxl", 
                     if_sheet_exists='overlay', mode='a') as wrt:
     vif.to_excel(wrt, sheet_name='vif')
 
@@ -91,9 +91,12 @@ with pd.ExcelWriter('./output/CARS_STAT.xlsx', engine="openpyxl",
 # помощью коритерия White(а) и F критерия
 from statsmodels.stats.diagnostic import het_white
 e = fitmod00.resid
+print(e)
+print(X)
+
 WHT = pd.DataFrame(het_white(e, X), index= ['LM', 'LM_P', 'F', 'F_P'])
 # Сохраняем полученные результаты
-with pd.ExcelWriter('./output/CARS_STAT.xlsx', engine="openpyxl", 
+with pd.ExcelWriter('./output/realtor_stat.xlsx', engine="openpyxl", 
                     if_sheet_exists='overlay', mode='a') as wrt:
     WHT.to_excel(wrt, sheet_name='het')
 
@@ -110,13 +113,14 @@ mq = pd.concat([mq, q])
 
 Здесь на 10% уровне незначима 'signal_есть'
 """
-X_1 = X.drop('signal_есть', axis=1)
+# X_1 = X.drop('status_second_sale', axis=1) (???)
+X_1 = X.copy()
 # Формируем объект, содержащий все исходные данные и методы для оценивания
 linreg01 = sm.OLS(Y,X_1)
 # Оцениваем модель
 fitmod01 = linreg01.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/CARS_STAT.txt', 'a') as fln:
+with open('./output/realtor_stat.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod01.summary(), file=fln)
@@ -153,7 +157,7 @@ X_1['ma'] = X_1['mlg']*X_1['age']
 linreg02 = sm.OLS(Y,X_1)
 fitmod02 = linreg02.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/CARS_STAT.txt', 'a') as fln:
+with open('./output/realtor_stat.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod02.summary(), file=fln)
@@ -189,7 +193,7 @@ X_2['mm'] = X_2['mlg']*X_2['music_есть']
 linreg03 = sm.OLS(Y,X_2)
 fitmod03 = linreg03.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/CARS_STAT.txt', 'a') as fln:
+with open('./output/realtor_stat.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod03.summary(), file=fln)
@@ -230,7 +234,7 @@ X_3['mth'] = X_3['mlg']*mlg_thr # Взаимодействие
 linreg04 = sm.OLS(Y,X_3)
 fitmod04 = linreg04.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/CARS_STAT.txt', 'a') as fln:
+with open('./output/realtor_stat.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod04.summary(), file=fln)

@@ -1,3 +1,4 @@
 /work/logs/*
 /work/output/*
 .DS_Store
+*.pyc

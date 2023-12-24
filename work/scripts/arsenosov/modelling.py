@@ -78,12 +78,12 @@ with pd.ExcelWriter('./output/CARS_STAT.xlsx', engine="openpyxl",
                     if_sheet_exists='overlay', mode='a') as wrt:
     vif.to_excel(wrt, sheet_name='vif')
 
-quit()
-
 # Проверяем гетероскедастичность базовой модели
 # помощью коритерия White(а) и F критерия
 from statsmodels.stats.diagnostic import het_white
 e = fitmod00.resid
+print(e)
+print(X)
 WHT = pd.DataFrame(het_white(e, X), index= ['LM', 'LM_P', 'F', 'F_P'])
 # Сохраняем полученные результаты
 with pd.ExcelWriter('./output/CARS_STAT.xlsx', engine="openpyxl", 
