@@ -1,4 +1,5 @@
 /work/logs/*
 /work/output/*
+/work/data/processed-realtor-data.csv
 .DS_Store
 *.pyc
