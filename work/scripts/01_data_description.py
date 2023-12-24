@@ -36,18 +36,6 @@ IQR: pd.Series = dfDataFloat.quantile(q=0.75) - dfDataFloat.quantile(q=0.25)
 dfIQR = pd.DataFrame([IQR], index=['IQR'])
 dfStats = pd.concat([dfDescribe, dfIQR])
 
-irq = dfIQR['price']
-wisker_u = (dfStats.loc['50%', 'price'] + 1.5*irq).values[0]
-wisker_l = (dfStats.loc['50%', 'price'] - 1.5*irq).values[0]
-out = (dfDataFloat['price'] > wisker_u) | (dfDataFloat['price'] <= wisker_l)
-dfDataFloat = dfDataFloat[~out]
-
-dfDescribe = dfDataFloat.describe()
-IQR: pd.Series = dfDataFloat.quantile(q=0.75) - dfDataFloat.quantile(q=0.25)
-dfIQR = pd.DataFrame([IQR], index=['IQR'])
-dfStats = pd.concat([dfDescribe, dfIQR])
-
-
 logging.info(f"Results\n{dfStats}\n")
 
 # removing NaN values to measure corellation
