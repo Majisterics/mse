@@ -109,11 +109,11 @@ from scipy.stats import kruskal # 3 и более групп
 from scipy.stats import mannwhitneyu # 2 группы
 
 kruskal_res = kruskal(firstsalePrice, secondsalePrice, nan_policy="omit")
-print("-- kruskal --")
+print("-- kruskal for status-price --")
 print(kruskal_res)
 
 mannwhitneyu_res = mannwhitneyu(firstsalePrice, secondsalePrice, nan_policy="omit")
-print("-- mannwhitneyu --")
+print("-- mannwhitneyu for status-price --")
 print(mannwhitneyu_res)
 
 # bed -- price
@@ -147,6 +147,10 @@ dfBedGroup = pd.DataFrame({
     "8+": bed_group8
 })
 
+kruskal_res = kruskal(bed_group1, bed_group2, bed_group3, bed_group4, bed_group5, bed_group6, bed_group7, bed_group8, nan_policy="omit")
+print("-- kruskal for bed-price --")
+print(kruskal_res)
+
 ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="price", xlabel="range of bedrooms")
 ax.get_figure().savefig(pImages.joinpath("bed_box").with_suffix(".png"))
 ax.get_figure().clear()
@@ -169,6 +173,10 @@ dfBathGroup = pd.DataFrame({
     "3": bath_group3,
     "4+": bath_group4,
 })
+
+kruskal_res = kruskal(bath_group1, bath_group2, bath_group3, bath_group4, nan_policy="omit")
+print("-- kruskal for bath-price --")
+print(kruskal_res)
 
 ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms")
 ax.get_figure().savefig(pImages.joinpath("bath_box").with_suffix(".png"))
@@ -197,6 +205,14 @@ ax.get_figure().clear()
 # status from acre_lot
 firstsaleSize = dfData[dfData["status"] == "for_sale"]["acre_lot"]
 secondsaleSize = dfData[dfData["status"] == "second_sale"]["acre_lot"]
+
+kruskal_res = kruskal(firstsalePrice, secondsaleSize, nan_policy="omit")
+print("-- kruskal for status-acre_size --")
+print(kruskal_res)
+
+mannwhitneyu_res = mannwhitneyu(firstsalePrice, secondsaleSize, nan_policy="omit")
+print("-- mannwhitneyu for status-acre_size --")
+print(mannwhitneyu_res)
 
 dfPrice = pd.DataFrame({
     "for_sale": firstsaleSize,
