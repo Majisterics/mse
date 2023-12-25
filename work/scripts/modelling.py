@@ -16,7 +16,7 @@ from pathlib import Path
 from pandas.api.types import CategoricalDtype
 
 # Очичаем файл перед запуском
-with open('./output/realtor_stat.txt', 'w') as fln:
+with open('./output/modelling.txt', 'w') as fln:
     print()
 
 pWork: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
@@ -73,7 +73,7 @@ linreg00 = sm.OLS(Y,X)
 # Оцениваем модель
 fitmod00 = linreg00.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod00.summary(), file=fln)
@@ -86,7 +86,7 @@ vif["vars"] = X_q.columns
 vif["VIF"] = [variance_inflation_factor(X_q.values, i) 
               for i in range(X_q.shape[1])]
 # Сохраняем полученные результаты
-with pd.ExcelWriter('./output/realtor_stat.xlsx', engine="openpyxl", 
+with pd.ExcelWriter('./output/modelling.xlsx', engine="openpyxl", 
                     if_sheet_exists='overlay', mode='a') as wrt:
     vif.to_excel(wrt, sheet_name='vif')
 
@@ -97,7 +97,7 @@ e = fitmod00.resid
 
 WHT = pd.DataFrame(het_white(e, X), index= ['LM', 'LM_P', 'F', 'F_P'])
 # Сохраняем полученные результаты
-with pd.ExcelWriter('./output/realtor_stat.xlsx', engine="openpyxl", 
+with pd.ExcelWriter('./output/modelling.xlsx', engine="openpyxl", 
                     if_sheet_exists='overlay', mode='a') as wrt:
     WHT.to_excel(wrt, sheet_name='het')
 
@@ -107,10 +107,8 @@ q = pd.DataFrame([fitmod00.rsquared_adj, fitmod00.aic],
 mq = pd.concat([mq, q])    
 
 """
-Исключаем из базовой модели незначимые переменные
-Строго пошагово. После исключения каждой пересчитываем модель
-Мультиколлинеарность и гетероскедастичность проверяем для итога
-Учитываем необходимость проверки гипотез.
+Исключаем из базовой модели переменные, которые считаем ненужными
+На самом деле исключаем по одной, понимаем, что 
 
 """
 X_1 = X.drop('bed', axis=1)
@@ -119,14 +117,62 @@ linreg01 = sm.OLS(Y,X_1)
 # Оцениваем модель
 fitmod01 = linreg01.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели без bed ******',
           file=fln)
     print(fitmod01.summary(), file=fln)
     
 # Сохраняем данные о качестве модели
 q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-                 index=['adjR^2', 'AIC'], columns=['base_01']).T
+                 index=['adjR^2', 'AIC'], columns=['base_no_bed']).T
+mq = pd.concat([mq, q])
+
+X_1 = X.drop('bath', axis=1)
+# Формируем объект, содержащий все исходные данные и методы для оценивания
+linreg01 = sm.OLS(Y,X_1)
+# Оцениваем модель
+fitmod01 = linreg01.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели без bath ******',
+          file=fln)
+    print(fitmod01.summary(), file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+                 index=['adjR^2', 'AIC'], columns=['base_no_bath']).T
+mq = pd.concat([mq, q])
+
+X_1 = X.drop('acre_lot', axis=1)
+# Формируем объект, содержащий все исходные данные и методы для оценивания
+linreg01 = sm.OLS(Y,X_1)
+# Оцениваем модель
+fitmod01 = linreg01.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели без acre_lot ******',
+          file=fln)
+    print(fitmod01.summary(), file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+                 index=['adjR^2', 'AIC'], columns=['base_no_acre_lot']).T
+mq = pd.concat([mq, q])
+
+X_1 = X.drop('house_size', axis=1)
+# Формируем объект, содержащий все исходные данные и методы для оценивания
+linreg01 = sm.OLS(Y,X_1)
+# Оцениваем модель
+fitmod01 = linreg01.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели без house_size ******',
+          file=fln)
+    print(fitmod01.summary(), file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic],
+                 index=['adjR^2', 'AIC'], columns=['base_no_house_size']).T
 mq = pd.concat([mq, q])    
 
 # Обратите внимание - модель стала хуже. Лучше вернуться к предыдущей.
@@ -150,7 +196,7 @@ X_1 = X.copy()
 linreg01 = sm.OLS(Y,X_1)
 fitmod01 = linreg01.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели для гипотезы №1 ******',
           file=fln)
     print(fitmod01.summary(), file=fln)
@@ -183,7 +229,7 @@ X_2['bed_from_bath'] = X_2['bath']*X_2['bed']
 linreg02 = sm.OLS(Y,X_2)
 fitmod02 = linreg02.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели для гипотезы №2 ******',
           file=fln)
     print(fitmod02.summary(), file=fln)
@@ -221,7 +267,7 @@ X_3['ath'] = X_3['acre_lot']*acre_thr # Взаимодействие
 linreg03 = sm.OLS(Y,X_3)
 fitmod03 = linreg03.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
           file=fln)
     print(fitmod03.summary(), file=fln)
@@ -306,7 +352,7 @@ X_3['mth'] = X_3['mlg']*mlg_thr # Взаимодействие
 linreg04 = sm.OLS(Y,X_3)
 fitmod04 = linreg04.fit()
 # Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
+with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod04.summary(), file=fln)
