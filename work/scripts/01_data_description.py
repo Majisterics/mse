@@ -25,9 +25,14 @@ logging.info(f"Interesting\nColumns bed and bath contain NaN values, so they can
 
 status_cat_type = CategoricalDtype(categories=["ready_to_build", "for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
+dfData["bed"] = dfData["bed"].astype("category")
+dfData["bath"] = dfData["bath"].astype("category")
 
 print(dfData)
 print(dfData.dtypes)
+print("-- bed category --", dfData["bed"].describe(), sep="\n")
+print("-- bath category --", dfData["bath"].describe(), sep="\n")
+print("-- status category --", dfData["status"].describe(), sep="\n")
 
 # preparing statistics
 dfDataFloat = dfData.select_dtypes(include='float')
