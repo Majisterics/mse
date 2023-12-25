@@ -89,3 +89,18 @@ dfBathNorm = dfBath.value_counts(normalize=True, sort=False)
 ax = dfBathNorm.plot.bar(rot=0, ylabel="frequency", xlabel="range of bathrooms")
 ax.get_figure().savefig(pImages.joinpath("bath_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
+
+# Статистические взаимосвязи
+
+firstsalePrice = dfData[dfData["status"] == "for_sale"]["price"]
+secondsalePrice = dfData[dfData["status"] == "second_sale"]["price"]
+
+dfPrice = pd.DataFrame({
+    "for_sale": firstsalePrice,
+    "second_sale": secondsalePrice
+})
+
+# visually detected huge and strange prices originally here
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"])
+ax.get_figure().savefig(pImages.joinpath("status_box").with_suffix(".png"))
+ax.get_figure().clear()
