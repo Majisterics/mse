@@ -6,12 +6,10 @@ from pandas.api.types import CategoricalDtype
 
 
 pWork: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
+logging.basicConfig(level=logging.INFO, filename=pWork.joinpath("logs").joinpath("out_removal.log"), filemode="w")
 
 pData: Path = pWork.joinpath("data")
 dfData = pd.read_csv(pData.joinpath("processed-realtor-data").with_suffix(".csv"))
-
-# bed and bath contain NaN values, so they cannot be casted to int64 dtype
-logging.info(f"Interesting\nColumns bed and bath contain NaN values, so they cannot be casted to int64 dtype.\n")
 
 status_cat_type = CategoricalDtype(categories=["ready_to_build", "for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
@@ -34,9 +32,19 @@ irq_price = dfIQR['price']
 wisker_u_price = (dfStats.loc['50%', 'price'] + 1.5*irq_price).values[0]
 wisker_l_price = (dfStats.loc['50%', 'price'] - 1.5*irq_price).values[0]
 
-out = (dfData['acre_lot'] > wisker_u_acre_lot) | (dfData['acre_lot'] <= wisker_l_acre_lot) |\
-      (dfData['house_size'] > wisker_u_house_size) | (dfData['house_size'] <= wisker_l_house_size) |\
-      (dfData['price'] > wisker_u_price) | (dfData['price'] <= wisker_l_price)
+bdfAcre = (dfData['acre_lot'] > wisker_u_acre_lot) | (dfData['acre_lot'] <= wisker_l_acre_lot)
+bdfHouse = (dfData['house_size'] > wisker_u_house_size) | (dfData['house_size'] <= wisker_l_house_size)
+bdfPrice = (dfData['price'] > wisker_u_price) | (dfData['price'] <= wisker_l_price)
+
+out = bdfAcre | bdfHouse | bdfPrice
+
+logging.info(f"Out values\n" +
+             f"acre_lot: {len(dfData[bdfAcre])}, {len(dfData[bdfAcre]) * 100 / len(dfData):.2f}%\n" +
+             f"house_size: {len(dfData[bdfHouse])}, {len(dfData[bdfHouse]) * 100 / len(dfData):.2f}%\n" +
+             f"price: {len(dfData[bdfPrice])}, {len(dfData[bdfPrice]) * 100 / len(dfData):.2f}%\n" +
+             f"combined all: {len(dfData[out])}, {len(dfData[out]) * 100 / len(dfData):.2f}%\n")
+
+logging.info(f"After removing\nwere: {len(dfData)}\nnow are: {len(dfData[~out])}\n")
 
 dfData = dfData[~out]
 
