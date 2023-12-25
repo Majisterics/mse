@@ -10,6 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from pandas.api.types import CategoricalDtype
+import numpy as np
+from scipy.stats import norm
 
 
 pWork: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
@@ -25,17 +27,29 @@ print(dfData.shape[0])
 # status, bed, bath -- порядковые переменные
 
 # 1. Гистограмма для acre_lot
-ax = dfData["acre_lot"].plot.hist()
+ax = dfData["acre_lot"].plot.hist(density=True, bins=30, xlabel="land size in square meters", ylabel="frequency")
+x = np.arange(min(dfData["acre_lot"]), max(dfData["acre_lot"]), 0.001)
+plt.plot(x, norm.pdf(x, dfData["acre_lot"].mean(), dfData["acre_lot"].std()), "--")
+plt.axvline(x=dfData["acre_lot"].mean(), color="orange")
+plt.axvline(x=dfData["acre_lot"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("acre_lot_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 2. Гистограмма для house_size
-ax = dfData["house_size"].plot.hist()
+ax = dfData["house_size"].plot.hist(density=True, bins=30, xlabel="house size in square meters", ylabel="frequency")
+x = np.arange(min(dfData["house_size"]), max(dfData["house_size"]), 0.001)
+plt.plot(x, norm.pdf(x, dfData["house_size"].mean(), dfData["house_size"].std()), "--")
+plt.axvline(x=dfData["house_size"].mean(), color="orange")
+plt.axvline(x=dfData["house_size"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("house_size_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 3. Гистограмма для price
-ax = dfData["price"].plot.hist()
+ax = dfData["price"].plot.hist(density=True, bins=30, xlabel="price", ylabel="frequency")
+x = np.arange(min(dfData["price"]), max(dfData["price"]), 0.1)
+plt.plot(x, norm.pdf(x, dfData["price"].mean(), dfData["price"].std()), "--")
+plt.axvline(x=dfData["price"].mean(), color="orange")
+plt.axvline(x=dfData["price"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("price_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
