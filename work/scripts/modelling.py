@@ -112,17 +112,15 @@ mq = pd.concat([mq, q])
 Мультиколлинеарность и гетероскедастичность проверяем для итога
 Учитываем необходимость проверки гипотез.
 
-Здесь на 10% уровне незначима 'signal_есть'
 """
-# X_1 = X.drop('status_second_sale', axis=1) (???)
-X_1 = X.copy()
+X_1 = X.drop('bed', axis=1)
 # Формируем объект, содержащий все исходные данные и методы для оценивания
 linreg01 = sm.OLS(Y,X_1)
 # Оцениваем модель
 fitmod01 = linreg01.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/realtor_stat.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели ******',
+    print('\n ****** Оценка базовой модели без bed ******',
           file=fln)
     print(fitmod01.summary(), file=fln)
     
@@ -133,7 +131,36 @@ mq = pd.concat([mq, q])
 
 # Обратите внимание - модель стала хуже. Лучше вернуться к предыдущей.
 
-# ****************** Примеры проверок гипотез ******************
+# ****************** Проверки гипотез ******************
+
+"""
+Статус постройки влияет на цену
+Чем новее постройка, тем она дороже
+Модель для проверки:
+price = a0 + a1*status_for_sale + a2*bed + a3*bath + a4*acre_lot + a5*house_size + v
+*****************
+Если гипотеза справедлива, то a1>0и значима
+*****************
+
+Целевая переменная не меняется.
+
+"""
+
+X_1 = X.copy()
+linreg01 = sm.OLS(Y,X_1)
+fitmod01 = linreg01.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/realtor_stat.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели для гипотезы №1 ******',
+          file=fln)
+    print(fitmod01.summary(), file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+                 index=['adjR^2', 'AIC'], columns=['hyp_01']).T
+mq = pd.concat([mq, q])    
+
+# Коэфициент при первом статусе выше, чем при втором - следовательно, гипотеза подтверждается
 
 """
 Сила влияния количества спален на цену зависит от количества ванных комнат
@@ -151,58 +178,22 @@ price = a0 + a1*status_for_sale + a20*bed + a21*bath*bed + a3*bath + a4*acre_lot
 
 """
 
-X_1 = X.copy()
-X_1['bed_from_bath'] = X_1['bath']*X_1['bed']
-linreg02 = sm.OLS(Y,X_1)
+X_2 = X.copy()
+X_2['bed_from_bath'] = X_2['bath']*X_2['bed']
+linreg02 = sm.OLS(Y,X_2)
 fitmod02 = linreg02.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/realtor_stat.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели для гипотезы №1 ******',
+    print('\n ****** Оценка базовой модели для гипотезы №2 ******',
           file=fln)
     print(fitmod02.summary(), file=fln)
     
 # Сохраняем данные о качестве модели
 q = pd.DataFrame([fitmod02.rsquared_adj, fitmod02.aic], 
-                 index=['adjR^2', 'AIC'], columns=['hyp_01']).T
-mq = pd.concat([mq, q])    
+                 index=['adjR^2', 'AIC'], columns=['hyp_02']).T
+mq = pd.concat([mq, q])
 
 # Гипотеза отвергается
-
-"""
-Сила влияния пробега на цену зависит от наличия музыкальной системы.
-При наличии музыкальной системы сила влияния меньше.
-Наличие музыкальной системы указывают для привлечения внимания к более старым
-машинам 
-Модель для проверки:
-price = a0 + a1*'signal_есть'+ a2*'music_есть' + 
-+ (a30 + a31*music_есть)*mlg + a4*age + v 
-раскрывая скобки
-price = a0 + a1*'signal_есть'+ a2*'music_есть' + 
-+ a30*mlg + a31*music_есть*mlg + a4*age + v
-*****************
-Если гипотеза справедлива, то a30<0, a31>0 и значим 
-*****************
-
-Целевая переменная не меняется.
-
-"""
-# Вводим переменную взаимодействия
-X_2 = X.copy()
-X_2['mm'] = X_2['mlg']*X_2['music_есть']
-linreg03 = sm.OLS(Y,X_2)
-fitmod03 = linreg03.fit()
-# Сохраняем результаты оценки в файл
-with open('./output/realtor_stat.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели ******',
-          file=fln)
-    print(fitmod03.summary(), file=fln)
-    
-# Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod03.rsquared_adj, fitmod03.aic], 
-                 index=['adjR^2', 'AIC'], columns=['hyp_02']).T
-mq = pd.concat([mq, q])   
-
-# Коэффициент при переменной взаимодействия не значим. Гипотеза отвергается.
 
 """
 Сила влияния размера участка на цену зависит от размера дома:
@@ -222,24 +213,25 @@ price = a0 + a1*status_for_sale + a2*bed + a3*bath + a40*acre_lot + a41*acre_thr
 Целевая переменная не меняется.
 
 """
-thr = 40 # Порог пробега - вариант
-X_1 = X.copy()
+thr = 100 # Порог пробега - вариант
+X_3 = X.copy()
 # Формируем dummy из качественных переменных
-acre_thr = X_1['acre_lot'] - X_1['house_size'] >= thr
-X_1['ath'] = X_1['acre_lot']*acre_thr # Взаимодействие
-linreg04 = sm.OLS(Y,X_1)
-fitmod04 = linreg04.fit()
+acre_thr = X_3['acre_lot'] - X_3['house_size'] >= thr
+X_3['ath'] = X_3['acre_lot']*acre_thr # Взаимодействие
+linreg03 = sm.OLS(Y,X_3)
+fitmod03 = linreg03.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/realtor_stat.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели: проверка гипотезы №2 ******',
+    print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
           file=fln)
-    print(fitmod04.summary(), file=fln)
+    print(fitmod03.summary(), file=fln)
     
 # Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod04.rsquared_adj, fitmod04.aic], 
+q = pd.DataFrame([fitmod03.rsquared_adj, fitmod03.aic], 
                  index=['adjR^2', 'AIC'], columns=['hyp_03']).T
-print(q)
 mq = pd.concat([mq, q])   
+print(mq)
+quit()
 
 # Коэффициент при переменной взаимодействия не значим. Надо подбирать порог
 
