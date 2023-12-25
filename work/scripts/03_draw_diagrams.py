@@ -101,6 +101,17 @@ dfPrice = pd.DataFrame({
 })
 
 # visually detected huge and strange prices originally here
-ax = dfPrice.plot.box(column=["for_sale", "second_sale"])
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"], ylabel="price", xlabel="status")
 ax.get_figure().savefig(pImages.joinpath("status_box").with_suffix(".png"))
 ax.get_figure().clear()
+
+from scipy.stats import kruskal # 3 и более групп
+from scipy.stats import mannwhitneyu # 2 группы
+
+kruskal_res = kruskal(firstsalePrice, secondsalePrice, nan_policy="omit")
+print("-- kruskal --")
+print(kruskal_res)
+
+mannwhitneyu_res = mannwhitneyu(firstsalePrice, secondsalePrice, nan_policy="omit")
+print("-- mannwhitneyu --")
+print(mannwhitneyu_res)
