@@ -39,16 +39,19 @@ ax = dfData["price"].plot.hist()
 ax.get_figure().savefig(pImages.joinpath("price_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
-# Дополнительно и не необходимо
+# Графики для качественных переменных
+
+dfData["bed"] = dfData["bed"].astype("category")
+dfData["bath"] = dfData["bath"].astype("category")
 
 # 4. Гистограмма для bed
-ax = dfData["bed"].plot.hist()
-ax.get_figure().savefig(pImages.joinpath("bed_hist").with_suffix(".png"))
+ax = dfData["bed"].value_counts().plot.bar()
+ax.get_figure().savefig(pImages.joinpath("bed_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 5. Гистограмма для bath
-ax = dfData["bath"].plot.hist()
-ax.get_figure().savefig(pImages.joinpath("bath_hist").with_suffix(".png"))
+ax = dfData["bath"].value_counts().plot.bar()
+ax.get_figure().savefig(pImages.joinpath("bath_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 6. Гистограмма для status
