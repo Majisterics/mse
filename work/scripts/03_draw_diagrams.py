@@ -173,3 +173,37 @@ dfBathGroup = pd.DataFrame({
 ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms")
 ax.get_figure().savefig(pImages.joinpath("bath_box").with_suffix(".png"))
 ax.get_figure().clear()
+
+# price from acre_lot
+ax = dfData.plot.scatter(x='acre_lot',y='price',marker="x")
+ax.get_figure().savefig(pImages.joinpath("acre_price").with_suffix(".png"))
+ax.get_figure().clear()
+
+# beds from acre_lot
+ax = dfData.plot.scatter(x='acre_lot',y='bed',marker="x")
+ax.get_figure().savefig(pImages.joinpath("acre_bed").with_suffix(".png"))
+ax.get_figure().clear()
+
+# baths from acre_lot
+ax = dfData.plot.scatter(x='acre_lot',y='bath',marker="x")
+ax.get_figure().savefig(pImages.joinpath("acre_bath").with_suffix(".png"))
+ax.get_figure().clear()
+
+# house_size from acre_lot
+ax = dfData.plot.scatter(x='acre_lot',y='house_size',marker="x")
+ax.get_figure().savefig(pImages.joinpath("acre_house").with_suffix(".png"))
+ax.get_figure().clear()
+
+# status from acre_lot
+firstsaleSize = dfData[dfData["status"] == "for_sale"]["acre_lot"]
+secondsaleSize = dfData[dfData["status"] == "second_sale"]["acre_lot"]
+
+dfPrice = pd.DataFrame({
+    "for_sale": firstsaleSize,
+    "second_sale": secondsaleSize
+})
+
+# visually detected huge and strange prices originally here
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"])
+ax.get_figure().savefig(pImages.joinpath("status_with_size_box").with_suffix(".png"))
+ax.get_figure().clear()
