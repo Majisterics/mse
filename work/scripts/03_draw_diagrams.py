@@ -44,23 +44,35 @@ ax.get_figure().clear()
 dfData["bed"] = dfData["bed"].astype("category")
 dfData["bath"] = dfData["bath"].astype("category")
 
-# 4. Гистограмма для bed
-ax = dfData["bed"].value_counts().plot.bar()
+# 4. Диаграмма для bed
+ax = dfData["bed"].value_counts(sort=False).plot.bar(figsize=(12, 6))
 ax.get_figure().savefig(pImages.joinpath("bed_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
-# 5. Гистограмма для bath
-ax = dfData["bath"].value_counts().plot.bar()
+# 5. Диаграмма для bath
+ax = dfData["bath"].value_counts(sort=False).plot.bar(figsize=(12, 6))
 ax.get_figure().savefig(pImages.joinpath("bath_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
-# 6. Гистограмма для status
+# 6. Диаграмма для status
 status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
-# print(dfData.dtypes)
-# dfData["status_codes"] = dfData["status"].cat.codes
 
-dfStatus = pd.DataFrame({"status": ["for_sale", "second_sale"], "values": [len(dfData[dfData["status"] == "for_sale"]), len(dfData[dfData["status"] == "second_sale"])]})
-ax = dfStatus.plot.bar(x="status", rot=0)
+# dfStatus = pd.DataFrame({"status": ["for_sale", "second_sale"], "values": [len(dfData[dfData["status"] == "for_sale"]), len(dfData[dfData["status"] == "second_sale"])]})
+ax = dfData["status"].value_counts(sort=False, normalize=True).mul(100).plot.bar(rot=0, figsize=(6,4))
 ax.get_figure().savefig(pImages.joinpath("status_bar").with_suffix(".png"))
+ax.get_figure().clear()
+
+# Группировка категорий
+
+dfBed = pd.cut(dfData["bed"], bins=[0, 1, 2, 3, 4, 5, 6, 7, max(dfData["bed"])])
+dfBedNorm = dfBed.value_counts(normalize=True, sort=False).mul(100)
+ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6))
+ax.get_figure().savefig(pImages.joinpath("bed_binned_bar").with_suffix(".png"))
+ax.get_figure().clear()
+
+dfBath = pd.cut(dfData["bath"], bins=[0, 1, 2, 3, max(dfData["bath"])])
+dfBathNorm = dfBath.value_counts(normalize=True, sort=False).mul(100)
+ax = dfBathNorm.plot.bar(rot=0)
+ax.get_figure().savefig(pImages.joinpath("bath_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
