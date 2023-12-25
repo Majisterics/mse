@@ -32,6 +32,8 @@ dfData = pd.read_csv(pData.joinpath("processed-realtor-data").with_suffix(".csv"
 
 status_cat_type = CategoricalDtype(categories=["ready_to_build", "for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
+# dfData["bed"] = dfData["bed"].astype("category")
+# dfData["bath"] = dfData["bath"].astype("category")
 
 CA = dfData.copy()
 CA = CA.fillna(0)
@@ -183,9 +185,9 @@ mq = pd.concat([mq, q])
 Статус постройки влияет на цену
 Чем новее постройка, тем она дороже
 Модель для проверки:
-price = a0 + a1*status_for_sale + a2*bed + a3*bath + a4*acre_lot + a5*house_size + v
+price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a4*acre_lot + a5*house_size + v
 *****************
-Если гипотеза справедлива, то a1>0и значима
+Если гипотеза справедлива, то a11>0, a11>a12 и значима
 *****************
 
 Целевая переменная не меняется.
@@ -213,11 +215,12 @@ mq = pd.concat([mq, q])
 Рост количества спален приводит к росту стоимости недвижимости
 Чем больше ванных комнат, тем привлекательнее большим семьям
 Модель для проверки:
-price = a0 + a1*status_for_sale + (a20 + a21*bath)*bed + a3*bath + a4*acre_lot + a5*house_size + v
+price = a0 + a11*status_for_sale + a12*status_second_sale + (a20 + a21*bath)*bed + a3*bath + a4*acre_lot + a5*house_size + v
 Раскрывая скобки:
-price = a0 + a1*status_for_sale + a20*bed + a21*bath*bed + a3*bath + a4*acre_lot + a5*house_size + v
+price = a0 + a11*status_for_sale + a12*status_second_sale + a20*bed + a21*bath*bed + a3*bath + a4*acre_lot + a5*house_size + v
 *****************
-Если гипотеза справедлива, то a20<0, a21>0 и значима
+Если гипотеза справедлива, то a21>a20 (?), a21>0 и значима
+(a20 + a21*bath)*bed > 0, при этом bed > 0, bath > 0 => (a20 + a21*bath) > 0 и a21 > 0 => a21 > a20
 *****************
 
 Целевая переменная не меняется.
@@ -249,11 +252,11 @@ mq = pd.concat([mq, q])
 acre_thr = 1, если acre_lot-house_size >= thr и 0, если нет
 thr - неизвестный порог
 Модель для проверки:
-price = a0 + a1*status_for_sale + a2*bed + a3*bath + (a40 + a41*acre_thr)*acre_lot + a5*house_size + v
+price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + (a40 + a41*acre_thr)*acre_lot + (a50 + a51*acre_thr)*house_size + v
 Раскрывая скобки:
-price = a0 + a1*status_for_sale + a2*bed + a3*bath + a40*acre_lot + a41*acre_thr*acre_lot + a5*house_size + v
+price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a40*acre_lot + a41*acre_thr*acre_lot + a50*house_size + a51*acre_thr*house_size + v
 *****************
-Если гипотеза справедлива, то a40<0, a41>0 и значима 
+Если гипотеза справедлива, то a40>0, a41<0, a50>0, a51<0 и значима 
 *****************
 
 Целевая переменная не меняется.
@@ -264,6 +267,7 @@ X_3 = X.copy()
 # Формируем dummy из качественных переменных
 acre_thr = X_3['acre_lot'] - X_3['house_size'] >= thr
 X_3['ath'] = X_3['acre_lot']*acre_thr # Взаимодействие
+X_3['hth'] = X_3['house_size']*acre_thr
 linreg03 = sm.OLS(Y,X_3)
 fitmod03 = linreg03.fit()
 # Сохраняем результаты оценки в файл
