@@ -115,3 +115,61 @@ print(kruskal_res)
 mannwhitneyu_res = mannwhitneyu(firstsalePrice, secondsalePrice, nan_policy="omit")
 print("-- mannwhitneyu --")
 print(mannwhitneyu_res)
+
+# bed -- price
+
+group1 = dfData["bed"] == 1
+group2 = dfData["bed"] == 2
+group3 = dfData["bed"] == 3
+group4 = dfData["bed"] == 4
+group5 = dfData["bed"] == 5
+group6 = dfData["bed"] == 6
+group7 = dfData["bed"] == 7
+singular_groups = group1 | group2 | group3 | group4 | group5 | group6 | group7
+
+bed_group1 = dfData[group1]["price"]
+bed_group2 = dfData[group2]["price"]
+bed_group3 = dfData[group3]["price"]
+bed_group4 = dfData[group4]["price"]
+bed_group5 = dfData[group5]["price"]
+bed_group6 = dfData[group6]["price"]
+bed_group7 = dfData[group7]["price"]
+bed_group8 = dfData[~singular_groups]["price"]
+
+dfBedGroup = pd.DataFrame({
+    "1": bed_group1,
+    "2": bed_group2,
+    "3": bed_group3,
+    "4": bed_group4,
+    "5": bed_group5,
+    "6": bed_group6,
+    "7": bed_group7,
+    "8+": bed_group8
+})
+
+ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="price", xlabel="range of bedrooms")
+ax.get_figure().savefig(pImages.joinpath("bed_box").with_suffix(".png"))
+ax.get_figure().clear()
+
+# bath -- price
+
+group1 = dfData["bath"] == 1
+group2 = dfData["bath"] == 2
+group3 = dfData["bath"] == 3
+singular_groups = group1 | group2 | group3
+
+bath_group1 = dfData[group1]["price"]
+bath_group2 = dfData[group2]["price"]
+bath_group3 = dfData[group3]["price"]
+bath_group4 = dfData[~singular_groups]["price"]
+
+dfBathGroup = pd.DataFrame({
+    "1": bath_group1,
+    "2": bath_group2,
+    "3": bath_group3,
+    "4+": bath_group4,
+})
+
+ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms")
+ax.get_figure().savefig(pImages.joinpath("bath_box").with_suffix(".png"))
+ax.get_figure().clear()
