@@ -34,7 +34,11 @@ dfDataFloat = dfData.select_dtypes(include='float')
 dfDescribe = dfDataFloat.describe()
 IQR: pd.Series = dfDataFloat.quantile(q=0.75) - dfDataFloat.quantile(q=0.25)
 dfIQR = pd.DataFrame([IQR], index=['IQR'])
-dfStats = pd.concat([dfDescribe, dfIQR])
+# Расчёт коэффициента асимметрии
+dfSkew = pd.DataFrame([dfDataFloat.skew()], index=["skew"])
+# Расчёт коэфициента эксцесса
+dfKurt = pd.DataFrame([dfDataFloat.kurt()], index=["kurtosis"])
+dfStats = pd.concat([dfDescribe, dfIQR, dfSkew, dfKurt])
 
 logging.info(f"Results\n{dfStats}\n")
 
