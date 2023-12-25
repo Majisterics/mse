@@ -12,7 +12,7 @@ from pathlib import Path
 from pandas.api.types import CategoricalDtype
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
-
+from scipy.stats import kendalltau
 
 pWork: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
 logging.basicConfig(level=logging.INFO, filename=pWork.joinpath("logs").joinpath("data_description.txt"), filemode="w")
@@ -47,15 +47,17 @@ dfStats = pd.concat([dfDescribe, dfIQR, dfSkew, dfKurt])
 
 logging.info(f"Results\n{dfStats}\n")
 
-# removing NaN values to measure corellation
 C_P = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns) 
 P_P = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
 C_S = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
 P_S = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
+C_K = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
+P_K = pd.DataFrame([], index=dfDataFloat.columns, columns=dfDataFloat.columns)
 for x in dfDataFloat.columns:
     for y in dfDataFloat.columns:
         C_P.loc[x, y], P_P.loc[x, y] = pearsonr(dfDataFloat[x], dfDataFloat[y])
         C_S.loc[x, y], P_S.loc[x, y] = spearmanr(dfDataFloat[x], dfDataFloat[y])
+        C_K.loc[x, y], P_K.loc[x, y] = kendalltau(dfDataFloat[x], dfDataFloat[y])
 
 # saving statistics and corellation to output folder
 with pd.ExcelWriter('./output/realtor-stats.xlsx', engine="openpyxl") as wrt:
@@ -69,3 +71,7 @@ with pd.ExcelWriter('./output/realtor-stats.xlsx', engine="openpyxl") as wrt:
     C_S.to_excel(wrt, sheet_name='Spirmen')
     dr = C_S.shape[0] + 2
     P_S.to_excel(wrt, startrow=dr, sheet_name='Spirmen') # Значимость
+# Тау Кендалла
+    C_K.to_excel(wrt, sheet_name='Kendall')
+    dr = C_K.shape[0] + 2
+    P_K.to_excel(wrt, startrow=dr, sheet_name='Kendall') # Значимость
