@@ -45,12 +45,12 @@ dfData["bed"] = dfData["bed"].astype("category")
 dfData["bath"] = dfData["bath"].astype("category")
 
 # 4. Диаграмма для bed
-ax = dfData["bed"].value_counts(sort=False).plot.bar(figsize=(12, 6))
+ax = dfData["bed"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="number of bedrooms")
 ax.get_figure().savefig(pImages.joinpath("bed_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 5. Диаграмма для bath
-ax = dfData["bath"].value_counts(sort=False).plot.bar(figsize=(12, 6))
+ax = dfData["bath"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="number of bathrooms")
 ax.get_figure().savefig(pImages.joinpath("bath_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -58,21 +58,20 @@ ax.get_figure().clear()
 status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
 
-# dfStatus = pd.DataFrame({"status": ["for_sale", "second_sale"], "values": [len(dfData[dfData["status"] == "for_sale"]), len(dfData[dfData["status"] == "second_sale"])]})
-ax = dfData["status"].value_counts(sort=False, normalize=True).mul(100).plot.bar(rot=0, figsize=(6,4))
+ax = dfData["status"].value_counts(sort=False, normalize=True).plot.bar(ylabel="frequency", xlabel="status", rot=0, figsize=(6,4))
 ax.get_figure().savefig(pImages.joinpath("status_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 # Группировка категорий
 
 dfBed = pd.cut(dfData["bed"], bins=[0, 1, 2, 3, 4, 5, 6, 7, max(dfData["bed"])])
-dfBedNorm = dfBed.value_counts(normalize=True, sort=False).mul(100)
-ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6))
+dfBedNorm = dfBed.value_counts(normalize=True, sort=False)
+ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="range of bedrooms")
 ax.get_figure().savefig(pImages.joinpath("bed_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 dfBath = pd.cut(dfData["bath"], bins=[0, 1, 2, 3, max(dfData["bath"])])
-dfBathNorm = dfBath.value_counts(normalize=True, sort=False).mul(100)
-ax = dfBathNorm.plot.bar(rot=0)
+dfBathNorm = dfBath.value_counts(normalize=True, sort=False)
+ax = dfBathNorm.plot.bar(rot=0, ylabel="frequency", xlabel="range of bathrooms")
 ax.get_figure().savefig(pImages.joinpath("bath_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
