@@ -12,6 +12,7 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+import math
 from pathlib import Path
 from pandas.api.types import CategoricalDtype
 
@@ -80,6 +81,13 @@ with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели ******',
           file=fln)
     print(fitmod00.summary(), file=fln)
+    rss = fitmod00.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
+
 
 # Проверяем степень мультиколлинеарности только базовой модели
 from statsmodels.stats.outliers_influence import variance_inflation_factor
@@ -206,6 +214,12 @@ with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели для гипотезы №1 ******',
           file=fln)
     print(fitmod01.summary(), file=fln)
+    rss = fitmod01.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
     
 # Сохраняем данные о качестве модели
 q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
@@ -244,6 +258,12 @@ with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели для гипотезы №2 ******',
           file=fln)
     print(fitmod02.summary(), file=fln)
+    rss = fitmod02.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
     
 # Сохраняем данные о качестве модели
 q = pd.DataFrame([fitmod02.rsquared_adj, fitmod02.aic], 
@@ -285,6 +305,12 @@ with open('./output/modelling.txt', 'a') as fln:
     print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
           file=fln)
     print(fitmod03.summary(), file=fln)
+    rss = fitmod03.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
     
 # Сохраняем данные о качестве модели
 q = pd.DataFrame([fitmod03.rsquared_adj, fitmod03.aic], 
