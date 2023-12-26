@@ -30,13 +30,14 @@ logging.basicConfig(level=logging.INFO, filename=pWork.joinpath("logs").joinpath
 pData = pWork.joinpath("data")
 dfData = pd.read_csv(pData.joinpath("processed-realtor-data").with_suffix(".csv"))
 
-status_cat_type = CategoricalDtype(categories=["ready_to_build", "for_sale", "second_sale"], ordered=True)
+status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
-# dfData["bed"] = dfData["bed"].astype("category")
-# dfData["bath"] = dfData["bath"].astype("category")
+dfData["bed"] = dfData["bed"].astype(np.int32)
+dfData["bath"] = dfData["bath"].astype(np.int32)
+dfData["bed"] = dfData["bed"].astype(CategoricalDtype([0, 2, 3, 4, 5, 6, max(dfData["bed"])], ordered=True))
+dfData["bath"] = dfData["bath"].astype(CategoricalDtype([0, 1, 2, 3, max(dfData["bath"])], ordered=True))
 
 CA = dfData.copy()
-CA = CA.fillna(0)
 # print(CA.head())
 # Разбиение данных на тренировочное и тестовое множество
 # frac- доля данных в тренировочном множестве
@@ -59,14 +60,14 @@ mq = pd.DataFrame([], columns=['adjR^2', 'AIC']) # Данные о качест�
 # Формируем целевую переменную
 Y = CA_train['price']
 # Формируем фиктивные (dummy) переменные для всех качественных переменных
-DUM = pd.get_dummies(CA_train[['status']])
+DUM = pd.get_dummies(CA_train[['status', 'bed', 'bath']])
 # Выбираем переменные для уровней, которые войдут в модель
 # Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
 # переменную отсчитывается от него
-DUM = DUM[['status_for_sale', 'status_second_sale']]
+# DUM = DUM[['status_for_sale', 'status_second_sale']]
 # Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
 # Добавляем слева фиктивные переменные
-X = pd.concat([DUM, CA_train[['bed', 'bath', 'acre_lot', 'house_size']]], axis=1)
+X = pd.concat([DUM, CA_train[['acre_lot', 'house_size']]], axis=1)
 # Добавляем переменную равную единице для учета константы
 X = sm.add_constant(X)
 X = X.astype({'const':'uint8'}) # Сокращаем место для хранения константы
@@ -84,6 +85,7 @@ with open('./output/modelling.txt', 'a') as fln:
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 vif = pd.DataFrame() # Для хранения 
 X_q = X.select_dtypes(include='float64')# Только количественные регрессоры
+X_q = X_q[["acre_lot", "house_size"]]
 vif["vars"] = X_q.columns
 vif["VIF"] = [variance_inflation_factor(X_q.values, i) 
               for i in range(X_q.shape[1])]
@@ -108,76 +110,76 @@ q = pd.DataFrame([fitmod00.rsquared_adj, fitmod00.aic],
                  index=['adjR^2', 'AIC'], columns=['base_00']).T
 mq = pd.concat([mq, q])    
 
-"""
-Исключаем из базовой модели переменные, которые считаем ненужными
-На самом деле исключаем по одной, понимаем, что 
+# """
+# Исключаем из базовой модели переменные, которые считаем ненужными
+# На самом деле исключаем по одной, понимаем, что 
 
-"""
-X_1 = X.drop('bed', axis=1)
-# Формируем объект, содержащий все исходные данные и методы для оценивания
-linreg01 = sm.OLS(Y,X_1)
-# Оцениваем модель
-fitmod01 = linreg01.fit()
-# Сохраняем результаты оценки в файл
-with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели без bed ******',
-          file=fln)
-    print(fitmod01.summary(), file=fln)
+# """
+# X_1 = X.drop('bed', axis=1)
+# # Формируем объект, содержащий все исходные данные и методы для оценивания
+# linreg01 = sm.OLS(Y,X_1)
+# # Оцениваем модель
+# fitmod01 = linreg01.fit()
+# # Сохраняем результаты оценки в файл
+# with open('./output/modelling.txt', 'a') as fln:
+#     print('\n ****** Оценка базовой модели без bed ******',
+#           file=fln)
+#     print(fitmod01.summary(), file=fln)
     
-# Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-                 index=['adjR^2', 'AIC'], columns=['base_no_bed']).T
-mq = pd.concat([mq, q])
+# # Сохраняем данные о качестве модели
+# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+#                  index=['adjR^2', 'AIC'], columns=['base_no_bed']).T
+# mq = pd.concat([mq, q])
 
-X_1 = X.drop('bath', axis=1)
-# Формируем объект, содержащий все исходные данные и методы для оценивания
-linreg01 = sm.OLS(Y,X_1)
-# Оцениваем модель
-fitmod01 = linreg01.fit()
-# Сохраняем результаты оценки в файл
-with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели без bath ******',
-          file=fln)
-    print(fitmod01.summary(), file=fln)
+# X_1 = X.drop('bath', axis=1)
+# # Формируем объект, содержащий все исходные данные и методы для оценивания
+# linreg01 = sm.OLS(Y,X_1)
+# # Оцениваем модель
+# fitmod01 = linreg01.fit()
+# # Сохраняем результаты оценки в файл
+# with open('./output/modelling.txt', 'a') as fln:
+#     print('\n ****** Оценка базовой модели без bath ******',
+#           file=fln)
+#     print(fitmod01.summary(), file=fln)
     
-# Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-                 index=['adjR^2', 'AIC'], columns=['base_no_bath']).T
-mq = pd.concat([mq, q])
+# # Сохраняем данные о качестве модели
+# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+#                  index=['adjR^2', 'AIC'], columns=['base_no_bath']).T
+# mq = pd.concat([mq, q])
 
-X_1 = X.drop('acre_lot', axis=1)
-# Формируем объект, содержащий все исходные данные и методы для оценивания
-linreg01 = sm.OLS(Y,X_1)
-# Оцениваем модель
-fitmod01 = linreg01.fit()
-# Сохраняем результаты оценки в файл
-with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели без acre_lot ******',
-          file=fln)
-    print(fitmod01.summary(), file=fln)
+# X_1 = X.drop('acre_lot', axis=1)
+# # Формируем объект, содержащий все исходные данные и методы для оценивания
+# linreg01 = sm.OLS(Y,X_1)
+# # Оцениваем модель
+# fitmod01 = linreg01.fit()
+# # Сохраняем результаты оценки в файл
+# with open('./output/modelling.txt', 'a') as fln:
+#     print('\n ****** Оценка базовой модели без acre_lot ******',
+#           file=fln)
+#     print(fitmod01.summary(), file=fln)
     
-# Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-                 index=['adjR^2', 'AIC'], columns=['base_no_acre_lot']).T
-mq = pd.concat([mq, q])
+# # Сохраняем данные о качестве модели
+# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
+#                  index=['adjR^2', 'AIC'], columns=['base_no_acre_lot']).T
+# mq = pd.concat([mq, q])
 
-X_1 = X.drop('house_size', axis=1)
-# Формируем объект, содержащий все исходные данные и методы для оценивания
-linreg01 = sm.OLS(Y,X_1)
-# Оцениваем модель
-fitmod01 = linreg01.fit()
-# Сохраняем результаты оценки в файл
-with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели без house_size ******',
-          file=fln)
-    print(fitmod01.summary(), file=fln)
+# X_1 = X.drop('house_size', axis=1)
+# # Формируем объект, содержащий все исходные данные и методы для оценивания
+# linreg01 = sm.OLS(Y,X_1)
+# # Оцениваем модель
+# fitmod01 = linreg01.fit()
+# # Сохраняем результаты оценки в файл
+# with open('./output/modelling.txt', 'a') as fln:
+#     print('\n ****** Оценка базовой модели без house_size ******',
+#           file=fln)
+#     print(fitmod01.summary(), file=fln)
     
-# Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic],
-                 index=['adjR^2', 'AIC'], columns=['base_no_house_size']).T
-mq = pd.concat([mq, q])    
+# # Сохраняем данные о качестве модели
+# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic],
+#                  index=['adjR^2', 'AIC'], columns=['base_no_house_size']).T
+# mq = pd.concat([mq, q])    
 
-# Обратите внимание - модель стала хуже. Лучше вернуться к предыдущей.
+# # Обратите внимание - модель стала хуже. Лучше вернуться к предыдущей.
 
 # ****************** Проверки гипотез ******************
 
@@ -191,6 +193,8 @@ price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a
 *****************
 
 Целевая переменная не меняется.
+
+Результат: гипотеза принимается и считается значимой.
 
 """
 
@@ -225,11 +229,15 @@ price = a0 + a11*status_for_sale + a12*status_second_sale + a20*bed + a21*bath*b
 
 Целевая переменная не меняется.
 
+Результат: гипотеза отвергается.
+
 """
 
 X_2 = X.copy()
-X_2['bed_from_bath'] = X_2['bath']*X_2['bed']
-linreg02 = sm.OLS(Y,X_2)
+X_2["bed_bath"] = list(zip(CA_train["bed"], CA_train["bath"]))
+X_2 = pd.concat([pd.get_dummies(X_2["bed_bath"]), X_2], axis=1)
+X_2.drop(columns=["bed_bath"], inplace=True)
+linreg02 = sm.OLS(Y, X_2)
 fitmod02 = linreg02.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/modelling.txt', 'a') as fln:
@@ -261,8 +269,10 @@ price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a
 
 Целевая переменная не меняется.
 
+Результат: гипотеза принимается.
+
 """
-thr = 100 # Порог пробега - вариант
+thr = 235.47094188376752 # Порог пробега - подобранный
 X_3 = X.copy()
 # Формируем dummy из качественных переменных
 acre_thr = X_3['acre_lot'] - X_3['house_size'] >= thr
