@@ -35,8 +35,20 @@ status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], order
 dfData["status"] = dfData["status"].astype(status_cat_type)
 dfData["bed"] = dfData["bed"].astype(np.int32)
 dfData["bath"] = dfData["bath"].astype(np.int32)
-dfData["bed"] = dfData["bed"].astype(CategoricalDtype([0, 2, 3, 4, 5, 6, max(dfData["bed"])], ordered=True))
-dfData["bath"] = dfData["bath"].astype(CategoricalDtype([0, 1, 2, 3, max(dfData["bath"])], ordered=True))
+# уплотняем качественные переменные
+dfData["bed"] = pd.cut(
+    dfData["bed"],
+    labels=["1", "2", "3", "4", "5"],
+    bins=[0, 2, 3, 4, 5, max(dfData["bed"])]
+)
+dfData["bath"] = pd.cut(
+    dfData["bath"],
+    labels=["1", "2", "3", "4"],
+    bins=[0, 1, 2, 3, max(dfData["bath"])]
+)
+# определяем переменные, как порядковый тип
+dfData["bed"] = dfData["bed"].astype(CategoricalDtype(["1", "2", "3", "4", "5"], ordered=True))
+dfData["bath"] = dfData["bath"].astype(CategoricalDtype(["1", "2", "3", "4"], ordered=True))
 
 CA = dfData.copy()
 # print(CA.head())
@@ -66,8 +78,8 @@ DUM = pd.get_dummies(CA_train[['status', 'bed', 'bath']])
 # Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
 # переменную отсчитывается от него
 DUM = DUM[['status_second_sale',
-           'bed_2', 'bed_3', 'bed_4', 'bed_5', 'bed_6',
-           'bath_1', 'bath_2', 'bath_3']]
+           'bed_2', 'bed_3', 'bed_4', 'bed_5',
+           'bath_2', 'bath_3', 'bath_4']]
 # Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
 # Добавляем слева фиктивные переменные
 X = pd.concat([DUM, CA_train[['acre_lot', 'house_size']]], axis=1)

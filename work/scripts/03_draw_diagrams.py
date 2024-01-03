@@ -78,7 +78,7 @@ ax.get_figure().clear()
 
 # Группировка категорий
 
-dfBed = pd.cut(dfData["bed"], bins=[0, 1, 2, 3, 4, 5, 6, 7, max(dfData["bed"])])
+dfBed = pd.cut(dfData["bed"], bins=[0, 2, 3, 4, 5, max(dfData["bed"])])
 dfBedNorm = dfBed.value_counts(normalize=True, sort=False)
 ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="range of bedrooms")
 ax.get_figure().savefig(pImages.joinpath("bed_binned_bar").with_suffix(".png"))
