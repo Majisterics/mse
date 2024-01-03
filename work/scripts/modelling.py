@@ -65,7 +65,9 @@ DUM = pd.get_dummies(CA_train[['status', 'bed', 'bath']])
 # Выбираем переменные для уровней, которые войдут в модель
 # Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
 # переменную отсчитывается от него
-# DUM = DUM[['status_for_sale', 'status_second_sale']]
+DUM = DUM[['status_second_sale',
+           'bed_2', 'bed_3', 'bed_4', 'bed_5', 'bed_6',
+           'bath_1', 'bath_2', 'bath_3']]
 # Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
 # Добавляем слева фиктивные переменные
 X = pd.concat([DUM, CA_train[['acre_lot', 'house_size']]], axis=1)
