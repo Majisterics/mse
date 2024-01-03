@@ -223,3 +223,9 @@ dfPrice = pd.DataFrame({
 ax = dfPrice.plot.box(column=["for_sale", "second_sale"])
 ax.get_figure().savefig(pImages.joinpath("status_with_size_box").with_suffix(".png"))
 ax.get_figure().clear()
+
+# Взаимосвязь категория <-> категория
+# Качественные переменные: status, bed, bath
+
+with pd.ExcelWriter("./output/realtor-stats.xlsx", engine="openpyxl", mode="a", if_sheet_exists="replace") as wrt:
+    pd.crosstab(dfBed, dfBath).to_excel(wrt, sheet_name="cross_tab-bed_bath")
