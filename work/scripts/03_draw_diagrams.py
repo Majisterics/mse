@@ -101,7 +101,7 @@ dfPrice = pd.DataFrame({
 })
 
 # visually detected huge and strange prices originally here
-ax = dfPrice.plot.box(column=["for_sale", "second_sale"], ylabel="price", xlabel="status")
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"], ylabel="price", xlabel="status", notch=True)
 ax.get_figure().savefig(pImages.joinpath("status_box").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -151,7 +151,7 @@ kruskal_res = kruskal(bed_group1, bed_group2, bed_group3, bed_group4, bed_group5
 print("-- kruskal for bed-price --")
 print(kruskal_res)
 
-ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="price", xlabel="range of bedrooms")
+ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="price", xlabel="range of bedrooms", notch=True)
 ax.get_figure().savefig(pImages.joinpath("bed_box").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -178,7 +178,7 @@ kruskal_res = kruskal(bath_group1, bath_group2, bath_group3, bath_group4, nan_po
 print("-- kruskal for bath-price --")
 print(kruskal_res)
 
-ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms")
+ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms", notch=True)
 ax.get_figure().savefig(pImages.joinpath("bath_box").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -220,7 +220,7 @@ dfPrice = pd.DataFrame({
 })
 
 # visually detected huge and strange prices originally here
-ax = dfPrice.plot.box(column=["for_sale", "second_sale"])
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"], notch=True)
 ax.get_figure().savefig(pImages.joinpath("status_with_size_box").with_suffix(".png"))
 ax.get_figure().clear()
 
