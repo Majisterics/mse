@@ -16,7 +16,7 @@ import math
 from pathlib import Path
 from pandas.api.types import CategoricalDtype
 
-# Очичаем файл перед запуском
+# Очищаем файл перед запуском
 with open('./output/modelling.txt', 'w') as fln:
     print()
 
@@ -92,11 +92,11 @@ with open('./output/modelling.txt', 'a') as fln:
 # Проверяем степень мультиколлинеарности только базовой модели
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 vif = pd.DataFrame() # Для хранения 
-X_q = X.select_dtypes(include='float64')# Только количественные регрессоры
-X_q = X_q[["acre_lot", "house_size"]]
-vif["vars"] = X_q.columns
-vif["VIF"] = [variance_inflation_factor(X_q.values, i) 
-              for i in range(X_q.shape[1])]
+# X_q = X.select_dtypes(include='float64')# Только количественные регрессоры
+# X_q = X_q[["acre_lot", "house_size"]]
+vif["vars"] = X.columns
+vif["VIF"] = [variance_inflation_factor(X.values, i) 
+              for i in range(X.shape[1])]
 # Сохраняем полученные результаты
 with pd.ExcelWriter('./output/modelling.xlsx', engine="openpyxl", 
                     if_sheet_exists='overlay', mode='a') as wrt:

@@ -60,7 +60,7 @@ for x in dfDataFloat.columns:
         C_K.loc[x, y], P_K.loc[x, y] = kendalltau(dfDataFloat[x], dfDataFloat[y])
 
 # saving statistics and corellation to output folder
-with pd.ExcelWriter('./output/realtor-stats.xlsx', engine="openpyxl") as wrt:
+with pd.ExcelWriter('./output/data_description.xlsx', engine="openpyxl") as wrt:
 # Общая статистика
     dfStats.to_excel(wrt, sheet_name='stat')
 # Корреляция Пирсона
