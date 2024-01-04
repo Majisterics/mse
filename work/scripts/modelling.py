@@ -211,16 +211,16 @@ mq = pd.concat([mq, q])
 
 """
 Статус постройки влияет на цену
-Чем новее постройка, тем она дороже
+Чем новее постройка, тем она дешевле
 Модель для проверки:
 price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a4*acre_lot + a5*house_size + v
 *****************
-Если гипотеза справедлива, то a11>0, a11>a12 и значима
+Если гипотеза справедлива, то a11>0, a11<a12 и значима
 *****************
 
 Целевая переменная не меняется.
 
-Результат: гипотеза принимается и считается значимой.
+Результат: гипотеза отвергается.
 
 """
 
@@ -266,9 +266,23 @@ price = a0 + a11*status_for_sale + a12*status_second_sale + a20*bed + a21*bath*b
 """
 
 X_2 = X.copy()
-X_2["bed_bath"] = list(zip(CA_train["bed"], CA_train["bath"]))
-X_2 = pd.concat([pd.get_dummies(X_2["bed_bath"]), X_2], axis=1)
-X_2.drop(columns=["bed_bath"], inplace=True)
+
+X_2["bed_2 * bath_2"] = X_2["bath_2"] * X_2["bed_2"]
+X_2["bed_2 * bath_3"] = X_2["bath_3"] * X_2["bed_2"]
+X_2["bed_2 * bath_4"] = X_2["bath_4"] * X_2["bed_2"]
+
+X_2["bed_3 * bath_2"] = X_2["bath_2"] * X_2["bed_3"]
+X_2["bed_3 * bath_3"] = X_2["bath_3"] * X_2["bed_3"]
+X_2["bed_3 * bath_4"] = X_2["bath_4"] * X_2["bed_3"]
+
+X_2["bed_4 * bath_2"] = X_2["bath_2"] * X_2["bed_4"]
+X_2["bed_4 * bath_3"] = X_2["bath_3"] * X_2["bed_4"]
+X_2["bed_4 * bath_4"] = X_2["bath_4"] * X_2["bed_4"]
+
+X_2["bed_5 * bath_2"] = X_2["bath_2"] * X_2["bed_5"]
+X_2["bed_5 * bath_3"] = X_2["bath_3"] * X_2["bed_5"]
+X_2["bed_5 * bath_4"] = X_2["bath_4"] * X_2["bed_5"]
+
 linreg02 = sm.OLS(Y, X_2)
 fitmod02 = linreg02.fit()
 # Сохраняем результаты оценки в файл
@@ -312,7 +326,7 @@ price = a0 + a11*status_for_sale + a12*status_second_sale + a2*bed + a3*bath + a
 """
 thr = 134.26853707414827 # Порог пробега - подобранный
 X_3 = X.copy()
-# Формируем dummy из качественных переменных
+# False == 0, True == 1
 acre_thr = X_3['acre_lot'] - X_3['house_size'] >= thr
 X_3['ath'] = X_3['acre_lot']*acre_thr # Взаимодействие
 X_3['hth'] = X_3['house_size']*acre_thr
@@ -334,10 +348,93 @@ with open('./output/modelling.txt', 'a') as fln:
 q = pd.DataFrame([fitmod03.rsquared_adj, fitmod03.aic], 
                  index=['adjR^2', 'AIC'], columns=['hyp_03']).T
 mq = pd.concat([mq, q])   
+
+"""
+Промежуточная модель совмещает в себе альтернативную гипотезу 2 и
+гипотезу 3.
+"""
+
+thr = 134.26853707414827 # Порог пробега - подобранный
+X_4 = X.copy()
+
+acre_thr = X_4['acre_lot'] - X_4['house_size'] >= thr
+X_4['ath'] = X_4['acre_lot']*acre_thr # Взаимодействие
+X_4['hth'] = X_4['house_size']*acre_thr
+
+X_4["bed_2 * bath_2"] = X_4["bath_2"] * X_4["bed_2"]
+X_4["bed_2 * bath_3"] = X_4["bath_3"] * X_4["bed_2"]
+X_4["bed_2 * bath_4"] = X_4["bath_4"] * X_4["bed_2"]
+
+X_4["bed_3 * bath_2"] = X_4["bath_2"] * X_4["bed_3"]
+X_4["bed_3 * bath_3"] = X_4["bath_3"] * X_4["bed_3"]
+X_4["bed_3 * bath_4"] = X_4["bath_4"] * X_4["bed_3"]
+
+X_4["bed_4 * bath_2"] = X_4["bath_2"] * X_4["bed_4"]
+X_4["bed_4 * bath_3"] = X_4["bath_3"] * X_4["bed_4"]
+X_4["bed_4 * bath_4"] = X_4["bath_4"] * X_4["bed_4"]
+
+X_4["bed_5 * bath_2"] = X_4["bath_2"] * X_4["bed_5"]
+X_4["bed_5 * bath_3"] = X_4["bath_3"] * X_4["bed_5"]
+X_4["bed_5 * bath_4"] = X_4["bath_4"] * X_4["bed_5"]
+
+linreg04 = sm.OLS(Y,X_4)
+fitmod04 = linreg04.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
+          file=fln)
+    print(fitmod04.summary(), file=fln)
+    rss = fitmod04.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod04.rsquared_adj, fitmod04.aic], 
+                 index=['adjR^2', 'AIC'], columns=['opt_1']).T
+mq = pd.concat([mq, q])
+
+"""
+Оптимизация модели. Среди всех колонок была выбрана та,
+которая увеличивает R-squared модели и уменьшает AIC. Показатель
+adj. R-squared немного ухудшился по сравнению с предыдущей версией,
+но в общем можно наблюдать улучшение остальных показателей и
+уменьшение мультиколлинеарности. Далее было проверено, что
+дальнейшее удаление будет только уменьшать показатели модели.
+Итоговая и в то же время оптимальная модель представлена ниже.
+Мультиколлинеарность высокая, но показатели у модели выше, чем
+у базовой.
+"""
+
+X_5 = X_4.copy()
+
+X_5.drop(columns=["bath_4"], inplace=True)
+
+linreg05 = sm.OLS(Y, X_5)
+fitmod05 = linreg05.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
+        file=fln)
+    print(fitmod05.summary(), file=fln)
+    rss = fitmod05.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod05.rsquared_adj, fitmod05.aic], 
+                index=['adjR^2', 'AIC'], columns=['opt_2']).T
+mq = pd.concat([mq, q])
+
 print(mq)
+
 quit()
 
-# Коэффициент при переменной взаимодействия не значим. Надо подбирать порог
 
 # Предсказательная сила
 Y_test = CA_test['price']
