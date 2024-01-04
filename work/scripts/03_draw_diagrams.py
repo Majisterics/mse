@@ -27,27 +27,33 @@ print(dfData.shape[0])
 # status, bed, bath -- порядковые переменные
 
 # 1. Гистограмма для acre_lot
-ax = dfData["acre_lot"].plot.hist(density=True, bins=30, xlabel="land size in square meters", ylabel="frequency")
+ax = dfData["acre_lot"].plot.hist(density=True, bins=30)
 x = np.arange(min(dfData["acre_lot"]), max(dfData["acre_lot"]), 0.001)
 plt.plot(x, norm.pdf(x, dfData["acre_lot"].mean(), dfData["acre_lot"].std()), "--")
+plt.xlabel("Размер участка")
+plt.ylabel("Частота")
 plt.axvline(x=dfData["acre_lot"].mean(), color="orange")
 plt.axvline(x=dfData["acre_lot"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("acre_lot_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 2. Гистограмма для house_size
-ax = dfData["house_size"].plot.hist(density=True, bins=30, xlabel="house size in square meters", ylabel="frequency")
+ax = dfData["house_size"].plot.hist(density=True, bins=30)
 x = np.arange(min(dfData["house_size"]), max(dfData["house_size"]), 0.001)
 plt.plot(x, norm.pdf(x, dfData["house_size"].mean(), dfData["house_size"].std()), "--")
+plt.xlabel("Размер дома")
+plt.ylabel("Частота")
 plt.axvline(x=dfData["house_size"].mean(), color="orange")
 plt.axvline(x=dfData["house_size"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("house_size_hist").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 3. Гистограмма для price
-ax = dfData["price"].plot.hist(density=True, bins=30, xlabel="price", ylabel="frequency")
+ax = dfData["price"].plot.hist(density=True, bins=30)
 x = np.arange(min(dfData["price"]), max(dfData["price"]), 0.1)
 plt.plot(x, norm.pdf(x, dfData["price"].mean(), dfData["price"].std()), "--")
+plt.xlabel("Цена")
+plt.ylabel("Частота")
 plt.axvline(x=dfData["price"].mean(), color="orange")
 plt.axvline(x=dfData["price"].median(), color="orangered")
 ax.get_figure().savefig(pImages.joinpath("price_hist").with_suffix(".png"))
@@ -59,12 +65,12 @@ dfData["bed"] = dfData["bed"].astype("category")
 dfData["bath"] = dfData["bath"].astype("category")
 
 # 4. Диаграмма для bed
-ax = dfData["bed"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="number of bedrooms")
+ax = dfData["bed"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="Частота", xlabel="Количество спален")
 ax.get_figure().savefig(pImages.joinpath("bed_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 # 5. Диаграмма для bath
-ax = dfData["bath"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="number of bathrooms")
+ax = dfData["bath"].value_counts(sort=False, normalize=True).plot.bar(rot=0, figsize=(12, 6), ylabel="Частота", xlabel="Количество ванных")
 ax.get_figure().savefig(pImages.joinpath("bath_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -72,7 +78,7 @@ ax.get_figure().clear()
 status_cat_type = CategoricalDtype(categories=["for_sale", "second_sale"], ordered=True)
 dfData["status"] = dfData["status"].astype(status_cat_type)
 
-ax = dfData["status"].value_counts(sort=False, normalize=True).plot.bar(ylabel="frequency", xlabel="status", rot=0, figsize=(6,4))
+ax = dfData["status"].value_counts(sort=False, normalize=True).plot.bar(ylabel="Частота", xlabel="Статус участка", rot=0, figsize=(6,4))
 ax.get_figure().savefig(pImages.joinpath("status_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -80,13 +86,13 @@ ax.get_figure().clear()
 
 dfBed = pd.cut(dfData["bed"], bins=[0, 2, 3, 4, 5, max(dfData["bed"])])
 dfBedNorm = dfBed.value_counts(normalize=True, sort=False)
-ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6), ylabel="frequency", xlabel="range of bedrooms")
+ax = dfBedNorm.plot.bar(rot=0, figsize=(12, 6), ylabel="Частота", xlabel="Количество спален (сгруппированно)")
 ax.get_figure().savefig(pImages.joinpath("bed_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
 dfBath = pd.cut(dfData["bath"], bins=[0, 1, 2, 3, max(dfData["bath"])])
 dfBathNorm = dfBath.value_counts(normalize=True, sort=False)
-ax = dfBathNorm.plot.bar(rot=0, ylabel="frequency", xlabel="range of bathrooms")
+ax = dfBathNorm.plot.bar(rot=0, ylabel="Частота", xlabel="Количество ванных (сгруппированно)")
 ax.get_figure().savefig(pImages.joinpath("bath_binned_bar").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -101,7 +107,7 @@ dfPrice = pd.DataFrame({
 })
 
 # visually detected huge and strange prices originally here
-ax = dfPrice.plot.box(column=["for_sale", "second_sale"], ylabel="price", xlabel="status", notch=True)
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"], ylabel="Цена", xlabel="Статус участка", notch=True)
 ax.get_figure().savefig(pImages.joinpath("status_box").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -151,7 +157,7 @@ kruskal_res = kruskal(bed_group1, bed_group2, bed_group3, bed_group4, bed_group5
 print("-- kruskal for bed-price --")
 print(kruskal_res)
 
-ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="price", xlabel="range of bedrooms", notch=True)
+ax = dfBedGroup.plot.box(column=["1", "2", "3", "4", "5", "6", "7", "8+"], ylabel="Цена", xlabel="Количество спален (сгруппированно)", notch=True)
 ax.get_figure().savefig(pImages.joinpath("bed_box").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -178,27 +184,27 @@ kruskal_res = kruskal(bath_group1, bath_group2, bath_group3, bath_group4, nan_po
 print("-- kruskal for bath-price --")
 print(kruskal_res)
 
-ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="price", xlabel="range of bathrooms", notch=True)
+ax = dfBathGroup.plot.box(column=["1", "2", "3", "4+"], ylabel="Цена", xlabel="Количество ванных (сгруппированно)", notch=True)
 ax.get_figure().savefig(pImages.joinpath("bath_box").with_suffix(".png"))
 ax.get_figure().clear()
 
 # price from acre_lot
-ax = dfData.plot.scatter(x='acre_lot',y='price',marker="x")
+ax = dfData.plot.scatter(x='acre_lot',y='price',marker="x", xlabel='Размер участка', ylabel='Цена')
 ax.get_figure().savefig(pImages.joinpath("acre_price").with_suffix(".png"))
 ax.get_figure().clear()
 
 # beds from acre_lot
-ax = dfData.plot.scatter(x='acre_lot',y='bed',marker="x")
+ax = dfData.plot.scatter(x='acre_lot',y='bed',marker="x", xlabel='Размер участка', ylabel='Количество спален')
 ax.get_figure().savefig(pImages.joinpath("acre_bed").with_suffix(".png"))
 ax.get_figure().clear()
 
 # baths from acre_lot
-ax = dfData.plot.scatter(x='acre_lot',y='bath',marker="x")
+ax = dfData.plot.scatter(x='acre_lot',y='bath',marker="x", xlabel='Размер участка', ylabel='Количество ванных')
 ax.get_figure().savefig(pImages.joinpath("acre_bath").with_suffix(".png"))
 ax.get_figure().clear()
 
 # house_size from acre_lot
-ax = dfData.plot.scatter(x='acre_lot',y='house_size',marker="x")
+ax = dfData.plot.scatter(x='acre_lot',y='house_size',marker="x", xlabel='Размер участка', ylabel='Размер дома')
 ax.get_figure().savefig(pImages.joinpath("acre_house").with_suffix(".png"))
 ax.get_figure().clear()
 
@@ -220,7 +226,7 @@ dfPrice = pd.DataFrame({
 })
 
 # visually detected huge and strange prices originally here
-ax = dfPrice.plot.box(column=["for_sale", "second_sale"], notch=True)
+ax = dfPrice.plot.box(column=["for_sale", "second_sale"], notch=True, xlabel='Статус участка', ylabel='Количество')
 ax.get_figure().savefig(pImages.joinpath("status_with_size_box").with_suffix(".png"))
 ax.get_figure().clear()
 
