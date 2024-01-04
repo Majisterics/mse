@@ -136,77 +136,6 @@ q = pd.DataFrame([fitmod00.rsquared_adj, fitmod00.aic],
                  index=['adjR^2', 'AIC'], columns=['base_00']).T
 mq = pd.concat([mq, q])    
 
-# """
-# Исключаем из базовой модели переменные, которые считаем ненужными
-# На самом деле исключаем по одной, понимаем, что 
-
-# """
-# X_1 = X.drop('bed', axis=1)
-# # Формируем объект, содержащий все исходные данные и методы для оценивания
-# linreg01 = sm.OLS(Y,X_1)
-# # Оцениваем модель
-# fitmod01 = linreg01.fit()
-# # Сохраняем результаты оценки в файл
-# with open('./output/modelling.txt', 'a') as fln:
-#     print('\n ****** Оценка базовой модели без bed ******',
-#           file=fln)
-#     print(fitmod01.summary(), file=fln)
-    
-# # Сохраняем данные о качестве модели
-# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-#                  index=['adjR^2', 'AIC'], columns=['base_no_bed']).T
-# mq = pd.concat([mq, q])
-
-# X_1 = X.drop('bath', axis=1)
-# # Формируем объект, содержащий все исходные данные и методы для оценивания
-# linreg01 = sm.OLS(Y,X_1)
-# # Оцениваем модель
-# fitmod01 = linreg01.fit()
-# # Сохраняем результаты оценки в файл
-# with open('./output/modelling.txt', 'a') as fln:
-#     print('\n ****** Оценка базовой модели без bath ******',
-#           file=fln)
-#     print(fitmod01.summary(), file=fln)
-    
-# # Сохраняем данные о качестве модели
-# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-#                  index=['adjR^2', 'AIC'], columns=['base_no_bath']).T
-# mq = pd.concat([mq, q])
-
-# X_1 = X.drop('acre_lot', axis=1)
-# # Формируем объект, содержащий все исходные данные и методы для оценивания
-# linreg01 = sm.OLS(Y,X_1)
-# # Оцениваем модель
-# fitmod01 = linreg01.fit()
-# # Сохраняем результаты оценки в файл
-# with open('./output/modelling.txt', 'a') as fln:
-#     print('\n ****** Оценка базовой модели без acre_lot ******',
-#           file=fln)
-#     print(fitmod01.summary(), file=fln)
-    
-# # Сохраняем данные о качестве модели
-# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic], 
-#                  index=['adjR^2', 'AIC'], columns=['base_no_acre_lot']).T
-# mq = pd.concat([mq, q])
-
-# X_1 = X.drop('house_size', axis=1)
-# # Формируем объект, содержащий все исходные данные и методы для оценивания
-# linreg01 = sm.OLS(Y,X_1)
-# # Оцениваем модель
-# fitmod01 = linreg01.fit()
-# # Сохраняем результаты оценки в файл
-# with open('./output/modelling.txt', 'a') as fln:
-#     print('\n ****** Оценка базовой модели без house_size ******',
-#           file=fln)
-#     print(fitmod01.summary(), file=fln)
-    
-# # Сохраняем данные о качестве модели
-# q = pd.DataFrame([fitmod01.rsquared_adj, fitmod01.aic],
-#                  index=['adjR^2', 'AIC'], columns=['base_no_house_size']).T
-# mq = pd.concat([mq, q])    
-
-# # Обратите внимание - модель стала хуже. Лучше вернуться к предыдущей.
-
 # ****************** Проверки гипотез ******************
 
 """
@@ -381,7 +310,7 @@ linreg04 = sm.OLS(Y,X_4)
 fitmod04 = linreg04.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
+    print('\n ****** Оптимизация модели: №1 ******',
           file=fln)
     print(fitmod04.summary(), file=fln)
     rss = fitmod04.ssr
@@ -416,7 +345,7 @@ linreg05 = sm.OLS(Y, X_5)
 fitmod05 = linreg05.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели: проверка гипотезы №3 ******',
+    print('\n ****** Оптимизация модели: №2 ******',
         file=fln)
     print(fitmod05.summary(), file=fln)
     rss = fitmod05.ssr
@@ -431,131 +360,51 @@ q = pd.DataFrame([fitmod05.rsquared_adj, fitmod05.aic],
                 index=['adjR^2', 'AIC'], columns=['opt_2']).T
 mq = pd.concat([mq, q])
 
-print(mq)
+# Оптимизация далее идет во вред R-squared
+# Уменьшаем мультиколлинеарность и отслеживаем AIC
 
-quit()
+X_6 = X_5.copy()
+X_6.drop(columns=["acre_lot"], inplace=True)
 
-
-# Предсказательная сила
-Y_test = CA_test['price']
-DUM = pd.get_dummies(CA_test[['music', 'signal']])
-# Выбираем переменные для уровней, которые войдут в модель
-# Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
-# переменную отсчитывается от него
-DUM = DUM[['music_есть', 'signal_есть']]
-# Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
-# Добавляем слева фиктивные переменные
-X_test = pd.concat([DUM, CA_test[['age', 'mlg']]], axis=1)
-# Добавляем переменную равную единице для учета константы
-X_test = sm.add_constant(X_test)
-X_test = X_test.astype({'const':'uint8'})
-# Генерация предсказаний на тестовом множестве 
-pred_ols = fitmod00.get_prediction(X_test)
-# Генерация доверительных интервалов с доверительной вероятностью alpha
-frm = pred_ols.summary_frame(alpha=0.05)
-iv_l = frm["obs_ci_lower"] # Нижняя граница доверительных интервалов
-iv_u = frm["obs_ci_upper"] # Верхняя граница доверительных интервалов
-fv = frm['mean'] # Предсказанное значение целевой переменной
-# Построение графиков
-name = 'mlg' # Имя переменной относительно которой строим прогноз
-Z = X_test.loc[:, name]
-dfn = pd.DataFrame([Z, Y_test, fv, iv_u, iv_l]).T
-dfn = dfn.sort_values(by=name)
-fig, ax = plt.subplots(figsize=(8, 6))
-for z in dfn.columns[1:]:
-    dfn.plot(x=dfn.columns[0], y=z, ax=ax)
-ax.legend(loc="best")
-plt.show()
-
-# Подсчет среднеквадратической ошибки
-dif = np.sqrt((dfn.iloc[:,1] - dfn.iloc[:,2]).pow(2).sum()/dfn.shape[0])
-
-# Доля выходов за границы доверительых интервалов
-# Сортируем, чтобы индексы во всех рядах совпадали
-mn = dfn.iloc[:,1].sort_index() 
-out = ((mn > iv_u) + (mn < iv_l)).sum()/dfn.shape[0]
-
-# Гипотеза не отвергается. Модель стала заметно лучше.
-
-"""
-Сила влияния площади на цену зависит от 
-Сила влияния пробега на цену зависит от пробега.
-Скорость падения цены с ростом пробега до определенного значения больше, 
-чем после него. 
-Модель для проверки:
-Вводим переменную
-mlg_thr = 1, если mlg >= thr и 0, если нет
-thr - неизвестный порог
-!!! Порог надо подбирать экспериментально, увеличивая adjR^2 !!!
-price = a0 + a1*'signal_есть'+ a2*'music_есть' + 
-+ (a30 + a31*mlg_thr)*mlg + a4*age + v 
-раскрывая скобки
-price = a0 + a1*'signal_есть'+ a2*'music_есть' + 
-+ a30*mlg + a31*mlg_thr*mlg + a4*age + v
-*****************
-Если гипотеза справедлива, то a30<0, a31>0 и значим 
-*****************
-
-Целевая переменная не меняется.
-
-"""
-thr = 40 # Порог пробега - вариант
-X_3 = X.copy()
-# Формируем dummy из качественных переменных
-mlg_thr = X_3['mlg'] >= thr
-X_3['mth'] = X_3['mlg']*mlg_thr # Взаимодействие
-linreg04 = sm.OLS(Y,X_3)
-fitmod04 = linreg04.fit()
+linreg06 = sm.OLS(Y, X_6)
+fitmod06 = linreg06.fit()
 # Сохраняем результаты оценки в файл
 with open('./output/modelling.txt', 'a') as fln:
-    print('\n ****** Оценка базовой модели ******',
-          file=fln)
-    print(fitmod04.summary(), file=fln)
+    print('\n ****** Оптимизация модели: №3 ******',
+        file=fln)
+    print(fitmod06.summary(), file=fln)
+    rss = fitmod06.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
     
 # Сохраняем данные о качестве модели
-q = pd.DataFrame([fitmod04.rsquared_adj, fitmod04.aic], 
-                 index=['adjR^2', 'AIC'], columns=['hyp_03']).T
-mq = pd.concat([mq, q])   
+q = pd.DataFrame([fitmod06.rsquared_adj, fitmod06.aic], 
+                index=['adjR^2', 'AIC'], columns=['opt_3']).T
+mq = pd.concat([mq, q])
 
-# Коэффициент при переменной взаимодействия не значим. Надо подбирать порог
+X_7 = X_6.copy()
+X_7.drop(columns=["bed_5"], inplace=True)
 
-# Предсказательная сила
-Y_test = CA_test['price']
-DUM = pd.get_dummies(CA_test[['music', 'signal']])
-# Выбираем переменные для уровней, которые войдут в модель
-# Будет исключен один - базовый. ВЛияние включенных уровней на зависимую 
-# переменную отсчитывается от него
-DUM = DUM[['music_есть', 'signal_есть']]
-# Формируем pandas.DataFramee содержащий матрицу X объясняющих переменных 
-# Добавляем слева фиктивные переменные
-X_test = pd.concat([DUM, CA_test[['age', 'mlg']]], axis=1)
-# Добавляем переменную равную единице для учета константы
-X_test = sm.add_constant(X_test)
-X_test = X_test.astype({'const':'uint8'})
-# Генерация предсказаний на тестовом множестве 
-pred_ols = fitmod00.get_prediction(X_test)
-# Генерация доверительных интервалов с доверительной вероятностью alpha
-frm = pred_ols.summary_frame(alpha=0.05)
-iv_l = frm["obs_ci_lower"] # Нижняя граница доверительных интервалов
-iv_u = frm["obs_ci_upper"] # Верхняя граница доверительных интервалов
-fv = frm['mean'] # Предсказанное значение целевой переменной
-# Построение графиков
-name = 'mlg' # Имя переменной относительно которой строим прогноз
-Z = X_test.loc[:, name]
-dfn = pd.DataFrame([Z, Y_test, fv, iv_u, iv_l]).T
-dfn = dfn.sort_values(by=name)
-fig, ax = plt.subplots(figsize=(8, 6))
-for z in dfn.columns[1:]:
-    dfn.plot(x=dfn.columns[0], y=z, ax=ax)
-ax.legend(loc="best")
-plt.show()
+linreg07 = sm.OLS(Y, X_7)
+fitmod07 = linreg07.fit()
+# Сохраняем результаты оценки в файл
+with open('./output/modelling.txt', 'a') as fln:
+    print('\n ****** Оптимизация модели: №4 ******',
+        file=fln)
+    print(fitmod06.summary(), file=fln)
+    rss = fitmod07.ssr
+    print('Сумма квадратов остатков: ', rss, file=fln)
+    n = X['acre_lot'].size
+    k = X.size/n
+    hqc = n * math.log(rss/n)+2*k*math.log(math.log(n))
+    print('HQC: ', hqc, file=fln)
+    
+# Сохраняем данные о качестве модели
+q = pd.DataFrame([fitmod07.rsquared_adj, fitmod07.aic], 
+                index=['adjR^2', 'AIC'], columns=['opt_4']).T
+mq = pd.concat([mq, q])
 
-# Подсчет среднеквадратической ошибки
-dif = np.sqrt((dfn.iloc[:,1] - dfn.iloc[:,2]).pow(2).sum()/dfn.shape[0])
-
-# Доля выходов за границы доверительых интервалов
-# Сортируем, чтобы индексы во всех рядах совпадали
-mn = dfn.iloc[:,1].sort_index() 
-out = ((mn > iv_u) + (mn < iv_l)).sum()/dfn.shape[0]
-
-
+print(mq)
